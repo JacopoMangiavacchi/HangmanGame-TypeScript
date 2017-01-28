@@ -60,6 +60,49 @@ class HangmanGame {
         }
     };
 
+
+    tryLetter(letter: String): tryLetterResult {
+        if (this.secret.length == 0) {
+            return tryLetterResult.invalidSecret;
+        }
+
+        if (this.failedAttempts >= this.maxFail) {
+            return tryLetterResult.lost;
+        }
+
+        let clearLetter = this.clearPhrase(letter);
+        
+        if (clearLetter.length != 1) {
+            return tryLetterResult.invalidWord;
+        }
+
+        let clearWord = clearLetter[0];
+
+        if (this.searchLetterInString(clearWord, this.lettersTried)) {
+            return tryLetterResult.alreadyTried
+        }
+        
+        this.lettersTried += clearWord;
+        
+        if (this.searchLetterInString(clearWord, this.secret)) {
+            if (this.searchLetterInString(secretCharacter, this.discovered)) {
+                return tryLetterResult.found;
+            }
+            else {
+                return tryLetterResult.won;
+            }
+        }
+        
+        this.failedAttempts = (Number(this.failedAttempts) + 1);
+        
+        if (this.failedAttempts >= this.maxFail) {
+            return tryLetterResult.lost;
+        }
+        
+        return tryLetterResult.notFound;
+    }
+
+
     private searchLetterInString(letter: string, string: String): Boolean {
         return string.indexOf(letter) >= 0 ? true : false
     }
@@ -76,6 +119,7 @@ class HangmanGame {
 
 
 let game = new HangmanGame("This  is My computer!");
+console.log(game.tryLetter("i"))
 console.log(game.secret)
 console.log(game.singleWord)
 console.log(game.discovered)
