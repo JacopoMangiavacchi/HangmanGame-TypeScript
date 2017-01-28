@@ -102,6 +102,44 @@ class HangmanGame {
         return tryLetterResult.notFound;
     }
 
+   save(): String {
+        let gameDictionary = { "maxFail" : this.maxFail,
+                               "secret" : this.secret,
+                               "lettersTried" : this.lettersTried, 
+                               "failedAttempts" : this.failedAttempts };
+        
+        return JSON.stringify(gameDictionary);
+    }
+    
+    load(json: String): loadGameResult {
+        let jsonObject = JSON.parse(json as string);
+
+        this.maxFail = jsonObject["maxFail"];
+        this.secret = this.clearPhrase(jsonObject["secret"]);
+        this.lettersTried = jsonObject["lettersTried"];
+        this.failedAttempts = jsonObject["failedAttempts"];
+            
+            
+        if (this.secret.length == 0) {
+            return loadGameResult.invalidJson;
+        }
+        
+        this.singleWord = true;
+        if (this.secret.indexOf(' ') >= 0) {
+            this.singleWord = false;
+        }
+
+        if (this.failedAttempts >= this.maxFail) {
+            return loadGameResult.lost;
+        }
+        
+        if (this.searchLetterInString(secretCharacter, this.discovered)) {
+            return loadGameResult.ok;
+        }
+        else {
+            return loadGameResult.won;
+        }
+    }
 
     private searchLetterInString(letter: string, string: String): Boolean {
         return string.indexOf(letter) >= 0 ? true : false
@@ -115,13 +153,4 @@ class HangmanGame {
         return this.clearPhrase(singleWorld ? "computer" : "it is used for programming")
     }
 }
-
-
-
-let game = new HangmanGame("This  is My computer!");
-console.log(game.tryLetter("i"))
-console.log(game.secret)
-console.log(game.singleWord)
-console.log(game.discovered)
-
 
