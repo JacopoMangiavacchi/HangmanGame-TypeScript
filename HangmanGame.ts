@@ -1,4 +1,4 @@
-enum tryLetterResult {
+export enum tryLetterResult {
     invalidSecret,
     invalidWord,
     alreadyTried,
@@ -8,14 +8,14 @@ enum tryLetterResult {
     notFound,
 };
 
-enum loadGameResult {
+export enum loadGameResult {
     invalidJson,
     won,
     lost,
     ok
 };
 
-interface IHangmanGame {
+export interface IHangmanGame {
     maxFail: Number;
     secret: String;
     lettersTried: String;
@@ -25,7 +25,7 @@ interface IHangmanGame {
 const characterSet = "abcdefghijklmnopqrstuvwxyz";
 const secretCharacter = "_";
 
-class HangmanGame implements IHangmanGame {
+export class HangmanGame implements IHangmanGame {
     maxFail: Number;
     secret: String;
     lettersTried: String;
