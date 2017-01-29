@@ -15,14 +15,22 @@ enum loadGameResult {
     ok
 };
 
-const characterSet = "abcdefghijklmnopqrstuvwxyz";
-const secretCharacter = "_";
-
-class HangmanGame {
+interface IHangmanGame {
     maxFail: Number;
     secret: String;
     lettersTried: String;
     failedAttempts: Number;
+}
+
+const characterSet = "abcdefghijklmnopqrstuvwxyz";
+const secretCharacter = "_";
+
+class HangmanGame implements IHangmanGame {
+    maxFail: Number;
+    secret: String;
+    lettersTried: String;
+    failedAttempts: Number;
+
     singleWord: Boolean;
 
     get discovered(): String {
@@ -42,24 +50,19 @@ class HangmanGame {
         return discovered;
     };
 
-    constructor(secret?: String, singleWord:Boolean = true, maxFail: Number = 7) {
+    constructor(secret?: String, maxFail: Number = 7) {
         this.maxFail = maxFail;
         this.lettersTried = "";
         this.failedAttempts = 0;
+        this.singleWord = true;
 
         if (secret) {
             this.secret = this.clearPhrase(secret);
-            this.singleWord = true;
             if (this.secret.indexOf(' ') >= 0) {
                 this.singleWord = false;
             }
         }
-        else {
-            this.singleWord = singleWord;
-            this.secret = this.getSecret(singleWord)
-        }
     };
-
 
     tryLetter(letter: String): tryLetterResult {
         if (this.secret.length == 0) {
@@ -102,22 +105,24 @@ class HangmanGame {
         return tryLetterResult.notFound;
     }
 
-   save(): String {
-        let gameDictionary = { "maxFail" : this.maxFail,
-                               "secret" : this.secret,
-                               "lettersTried" : this.lettersTried, 
-                               "failedAttempts" : this.failedAttempts };
+    save(): IHangmanGame {
+        let game:IHangmanGame = { "maxFail" : this.maxFail,
+                                  "secret" : this.secret,
+                                  "lettersTried" : this.lettersTried, 
+                                  "failedAttempts" : this.failedAttempts };
         
-        return JSON.stringify(gameDictionary);
+        return game;
+    }
+
+    saveToString(): String {
+        return JSON.stringify(this.save());
     }
     
-    load(json: String): loadGameResult {
-        let jsonObject = JSON.parse(json as string);
-
-        this.maxFail = jsonObject["maxFail"];
-        this.secret = this.clearPhrase(jsonObject["secret"]);
-        this.lettersTried = jsonObject["lettersTried"];
-        this.failedAttempts = jsonObject["failedAttempts"];
+    load(game:IHangmanGame): loadGameResult {
+        this.maxFail = game.maxFail;
+        this.secret = this.clearPhrase(game.secret);
+        this.lettersTried = game.lettersTried;
+        this.failedAttempts = game.failedAttempts;
             
             
         if (this.secret.length == 0) {
@@ -141,6 +146,10 @@ class HangmanGame {
         }
     }
 
+    loadFromString(json: String): loadGameResult {
+        return this.load(JSON.parse(json as string) as IHangmanGame);
+    }
+
     private searchLetterInString(letter: string, string: String): Boolean {
         return string.indexOf(letter) >= 0 ? true : false
     }
@@ -148,9 +157,4 @@ class HangmanGame {
     private clearPhrase(secret:String):String {
         return secret.toLowerCase().replace(/[^a-z ]/g, "").replace(/\s+/g, ' ')
     }
-
-    private getSecret(singleWorld: Boolean):String {
-        return this.clearPhrase(singleWorld ? "computer" : "it is used for programming")
-    }
 }
-
